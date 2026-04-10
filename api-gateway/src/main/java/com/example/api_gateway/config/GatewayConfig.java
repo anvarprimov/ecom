@@ -23,6 +23,9 @@ public class GatewayConfig {
                 .route("product-service", r -> r
                         .path("/api/products", "/api/products/**")
                         .uri("lb://PRODUCT-SERVICE"))
+                .route("uesr-service", r -> r
+                        .path("/api/users", "/api/users/**")
+                        .uri("lb://USER-SERVICE"))
                 .build();
     }
 }
