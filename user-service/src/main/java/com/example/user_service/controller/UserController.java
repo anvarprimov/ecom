@@ -1,18 +1,13 @@
 package com.example.user_service.controller;
 
-import com.example.user_service.dto.LoginDto;
-import com.example.user_service.dto.Response;
-import com.example.user_service.dto.UserRequestDto;
-import com.example.user_service.dto.UserResponseDto;
+import com.example.user_service.dto.*;
 import com.example.user_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -30,5 +25,14 @@ public class UserController {
     public HttpEntity<Response<UserResponseDto>> login(@Valid @RequestBody LoginDto loginDto) {
         Response<UserResponseDto> response = userService.login(loginDto);
         return ResponseEntity.status(response.isSuccess() ? 200 : 404).body(response);
+    }
+
+    @GetMapping("/products")
+    public Page<ProductResponseDto> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sort
+    ) {
+        return userService.getAll(page, size, sort);
     }
 }
