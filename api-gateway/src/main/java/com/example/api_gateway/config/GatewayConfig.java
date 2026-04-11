@@ -15,10 +15,10 @@ public class GatewayConfig {
                 .route("eureka", r -> r
                         .path("/eureka", "/eureka/")
                         .filters(f -> f.rewritePath("/eureka", "/"))
-                        .uri("http://localhost:8761"))
+                        .uri("http://discovery-server:8761"))
                 .route("eureka-static", r -> r
                         .path("/eureka/**")
-                        .uri("http://localhost:8761"))
+                        .uri("http://discovery-server:8761"))
 
                 .route("product-service", r -> r
                         .path("/api/products", "/api/products/**")

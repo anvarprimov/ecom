@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: ecommerce_db
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -28,15 +28,77 @@ services:
   kafka:
     container_name: kafka
     image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     ports:
       - "9092:9092"
     networks:
       - ecommerce
+    restart: unless-stopped
+
+  discovery-server:
+    container_name: discovery-server
+    build: ./discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - ecommerce
+    restart: unless-stopped
+
+  product-service:
+    container_name: product-service
+    build: ./product-service
+    depends_on:
+      - postgres
+      - kafka
+      - discovery-server
+    environment:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_db
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: password
+        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    ports:
+      - "8082:8082"
+    networks:
+        - ecommerce
+    restart: unless-stopped
+
+  user-service:
+    container_name: user-service
+    build: ./user-service
+    depends_on:
+      - postgres
+      - kafka
+      - discovery-server
+    environment:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_db
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: password
+        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    ports:
+      - "8081:8081"
+    networks:
+        - ecommerce
+    restart: unless-stopped
+
+  api-gateway:
+    container_name: api-gateway
+    build: ./api-gateway
+    depends_on:
+      - discovery-server
+    environment:
+        EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+    ports:
+        - "8080:8080"
+    networks:
+        - ecommerce
     restart: unless-stopped
 
 volumes:
