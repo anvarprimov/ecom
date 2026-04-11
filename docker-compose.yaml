@@ -1,4 +1,19 @@
 services:
+  postgres:
+    container_name: postgres
+    image: postgres:15.3
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ecommerce_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce
+    restart: unless-stopped
+
   zookeeper:
     container_name: zookeeper
     image: confluentinc/cp-zookeeper:7.5.0
@@ -24,7 +39,8 @@ services:
       - ecommerce
     restart: unless-stopped
 
-
+volumes:
+    postgres_data:
 networks:
   ecommerce:
     driver: bridge
