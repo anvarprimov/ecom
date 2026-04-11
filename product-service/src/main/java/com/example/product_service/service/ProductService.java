@@ -2,6 +2,7 @@ package com.example.product_service.service;
 
 import com.example.product_service.dto.ProductRequestDto;
 import com.example.product_service.dto.ProductResponseDto;
+import com.example.product_service.dto.ProductUpdateEvent;
 import com.example.product_service.dto.Response;
 import com.example.product_service.entity.Product;
 import com.example.product_service.repository.ProductRepository;
@@ -39,6 +40,8 @@ public class ProductService {
         product.setName(requestDto.getName());
         product.setDescription(requestDto.getDescription());
         product.setPrice(requestDto.getPrice());
+        product.setQuantity(requestDto.getQuantity());
+        product.setBrand(requestDto.getBrand());
 
         Product savedProduct = productRepository.save(product);
         return Response.okData(toResponseDto(savedProduct));
@@ -68,5 +71,13 @@ public class ProductService {
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
+    }
+
+    public void updateProductFromEvent(ProductUpdateEvent event) {
+        Product product = getActiveProductById(event.getProductId());
+        Integer currentQty = product.getQuantity() == null ? 0 : product.getQuantity();
+        product.setQuantity(currentQty + event.getQuantity());
+        productRepository.save(product);
+        System.out.println("Product updated from event: " + event.getProductId() + ", new quantity: " + product.getQuantity());
     }
 }

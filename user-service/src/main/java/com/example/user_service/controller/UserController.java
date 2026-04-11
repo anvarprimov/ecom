@@ -1,6 +1,7 @@
 package com.example.user_service.controller;
 
 import com.example.user_service.dto.*;
+import com.example.user_service.service.KafkaProducerService;
 import com.example.user_service.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final KafkaProducerService kafkaProducerService;
 
     @PostMapping("/register")
     public HttpEntity<Response<UserResponseDto>> register(@Valid @RequestBody UserRequestDto userRequestDto) {
@@ -34,5 +36,11 @@ public class UserController {
             @RequestParam(defaultValue = "id") String sort
     ) {
         return userService.getAll(page, size, sort);
+    }
+
+    @PostMapping("/update-product")
+    public String updateProduct(@RequestBody ProductUpdateEvent event) {
+        kafkaProducerService.sendProductUpdateEvent(event);
+        return "Event sent";
     }
 }

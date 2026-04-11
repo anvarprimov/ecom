@@ -21,7 +21,7 @@ public class Product {
     private String name;
     private String description;
     private BigDecimal price;
-    private Integer quantity;
+    private Integer quantity = 0;
     private String brand;
     private boolean active = true;
 
